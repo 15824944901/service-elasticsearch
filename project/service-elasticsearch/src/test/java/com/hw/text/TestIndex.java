@@ -1,22 +1,25 @@
 package com.hw.text;
 
 import com.hw.service.entity.DataSource;
+import com.hw.service.util.AsyncCheckName;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cglib.beans.BeanMap;
-import org.apache.commons.io.FileUtils;
-
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +44,50 @@ public class TestIndex {
     private static final Logger logger = LoggerFactory.getLogger(TestIndex.class);
 
     public static final int FILE_SIZE = 1024;
+
+    @Test
+    public void searchDataSource() throws Exception {
+        ArrayList<DataSource> dataSourceList = new ArrayList<>();
+
+        for (int i = 1;i <= 1000000;i++) {
+            DataSource dataSource = new DataSource();
+            dataSource.setId(i + "");
+            dataSourceList.add(dataSource);
+        }
+        AsyncCheckName asyncCheckName = new AsyncCheckName();
+        Future<List<DataSource>> listFuture = asyncCheckName.checkName(dataSourceList);
+        while (true) { ///这里使用了循环判断，等待获取结果信息
+            if (listFuture.isDone()) { //判断是否执行完毕
+                System.out.println("Result from asynchronous process - " + listFuture.get());
+                break;
+            }
+            System.out.println("Continue doing something else. ");
+            System.out.println("main end:" + LocalDateTime.now() +
+                ",id:" + Thread.currentThread().getId());
+        }
+    }
+
+    // 拷贝文件夹
+    @Test
+    public void copyFileDir() throws IOException {
+        File file = new File("D:\\ddhome\\arch\\resource\\data\\dataset\\2926");
+        File file1 = new File("D:\\ddhome\\arch\\resource\\data\\dataset\\2925");
+        FileUtils.copyDirectory(file,file1);
+    }
+
+    // 拷贝文件
+    @SneakyThrows
+    @Test
+    public void copyFile() {
+        File source = new File("D:\\img\\goods\\index.jpg");
+        for (int i = 0;i < 30000; i++) {
+            String src = "C:\\Users\\Administrator\\Desktop\\开发文档\\";
+            src += UUID.randomUUID().toString().substring(0,5) + i + ".jpg";
+            File dest = new File(src);
+            Files.copy(source.toPath(), dest.toPath());
+        }
+
+    }
 
     @Test
     public void gets() {
@@ -60,14 +108,6 @@ public class TestIndex {
 
         maps.add(map);
         return maps;
-    }
-
-    // 拷贝文件夹
-    @Test
-    public void copyFile() throws IOException {
-        File file = new File("D:\\ddhome\\arch\\resource\\data\\dataset\\2926");
-        File file1 = new File("D:\\ddhome\\arch\\resource\\data\\dataset\\2925");
-        FileUtils.copyDirectory(file,file1);
     }
 
     // 对象转Map
