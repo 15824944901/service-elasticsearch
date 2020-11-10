@@ -18,6 +18,5 @@ public class ServiceElasticsearchApplication {
      */
     public static void main(String[] args) {
         SpringApplication.run(ServiceElasticsearchApplication.class,args);
-
     }
 }

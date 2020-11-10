@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -128,6 +130,7 @@ public class ElasticsearchUtil {
      * @return  String
      */
     public static String addData(JSONObject jsonObject, String index, String type, String id) {
+        BulkRequestBuilder builder = client.prepareBulk();
         IndexResponse response = client.prepareIndex(index, type, id).setSource(jsonObject).get();
         LOGGER.info("addData response status:{},id:{}", response.status().getStatus(), response.getId());
         return response.getId();
@@ -153,10 +156,26 @@ public class ElasticsearchUtil {
      * @param id    数据ID
      */
     public static void deleteDataById(String index, String type, String id) {
-
         DeleteResponse response = client.prepareDelete(index, type, id).execute().actionGet();
-
         LOGGER.info("deleteDataById response status:{},id:{}", response.status().getStatus(), response.getId());
+    }
+
+    /**
+     * 通过ID删除数据
+     *
+     * @param index 索引，类似数据库
+     * @param type  类型，类似表
+     * @param ids    数据Ids
+     */
+    public static void deleteData(String index, String type, String[] ids) {
+        //1. 创建批处理对象
+        BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
+        for (String id : ids) {
+            bulkRequestBuilder.add(client.prepareDelete(index,type,id));
+        }
+        //执行
+        BulkResponse response = bulkRequestBuilder.get();
+        LOGGER.info("deleteDataById response status:{},id:{}", response.status().getStatus(), response.getTook());
     }
 
     /**

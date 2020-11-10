@@ -1,7 +1,6 @@
 package com.hw.text;
 
 import com.hw.service.entity.DataSource;
-import com.hw.service.util.AsyncCheckName;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,33 +42,28 @@ public class TestIndex {
 
     public static final int FILE_SIZE = 1024;
 
-    @Test
-    public void searchDataSource() throws Exception {
-        ArrayList<DataSource> dataSourceList = new ArrayList<>();
 
-        for (int i = 1;i <= 1000000;i++) {
-            DataSource dataSource = new DataSource();
-            dataSource.setId(i + "");
-            dataSourceList.add(dataSource);
+    @Test
+    public void sssss() {
+        int page = 2;
+        int pageSize = 2;
+        List<Object> resultList = new ArrayList<>();
+        resultList.add(1);
+        resultList.add(2);
+        resultList.add(3);
+        resultList.add(4);
+        if (((page / 10) - 1) * pageSize < resultList.size()) {
+            resultList = resultList.subList((page == 0 ? 0 : page / 10) * pageSize, (((page / 10) + 1)
+                * pageSize) < resultList.size() ? ((page / 10) + 1) * pageSize : resultList.size());
         }
-        AsyncCheckName asyncCheckName = new AsyncCheckName();
-        Future<List<DataSource>> listFuture = asyncCheckName.checkName(dataSourceList);
-        while (true) { ///这里使用了循环判断，等待获取结果信息
-            if (listFuture.isDone()) { //判断是否执行完毕
-                System.out.println("Result from asynchronous process - " + listFuture.get());
-                break;
-            }
-            System.out.println("Continue doing something else. ");
-            System.out.println("main end:" + LocalDateTime.now() +
-                ",id:" + Thread.currentThread().getId());
-        }
+        System.out.println(resultList);
     }
 
     // 拷贝文件夹
     @Test
     public void copyFileDir() throws IOException {
-        File file = new File("D:\\ddhome\\arch\\resource\\data\\dataset\\2926");
-        File file1 = new File("D:\\ddhome\\arch\\resource\\data\\dataset\\2925");
+        File file = new File("D:\\ddhome\\arch\\resources\\data\\dataset\\2926");
+        File file1 = new File("D:\\ddhome\\arch\\resources\\data\\dataset\\2925");
         FileUtils.copyDirectory(file,file1);
     }
 
@@ -86,7 +78,6 @@ public class TestIndex {
             File dest = new File(src);
             Files.copy(source.toPath(), dest.toPath());
         }
-
     }
 
     @Test
@@ -127,15 +118,33 @@ public class TestIndex {
 
     @Test
     public void insertFiles() {
-        //fileRecursiveCall("dataset", new File("D:/ddhome/arch/resource/data/dataset/2926/algorithm"));
-
-        rootPath = rootPath.substring(2);
-        rootPath = rootPath.substring(0, rootPath.length() - 2);
-        System.out.println(rootPath);
-
+        //fileRecursiveCall("dataset", new File("D:/ddhome/arch/resources/data/dataset/2926/algorithm"));
+        System.out.println(machine("0.02MB"));
     }
 
-    String rootPath = "{'D:/ddhome/arch/resource/'}";
+    public String machine(String key) {
+        String unit = key.substring(key.length() - 2, key.length() - 1);
+        Double aDouble = Double.valueOf(key.substring(0, key.length() - 2));
+        if (unit.equals("G")) {
+            return aDouble * 1024 + unit + "i";
+        } else {
+            return aDouble + unit + "i";
+        }
+    }
+
+    @Test
+    public void ggg() {
+        String ss = "1.0MB";
+        String[] split = ss.split("\\.0");
+        System.out.println(split[0] + "     " +split[1]);
+        if (ss.contains(".0")  && 3 == ss.split("\\.")[1].length()) {
+            ss = ss.replace(".0", "");
+            System.out.println(ss);
+        } else {
+            System.out.println("1.01");
+        }
+    }
+
     private void fileRecursiveCall(String moduleType, File filePath) {
         File[] files = filePath.listFiles();
         if (Objects.isNull(files)) {
@@ -143,8 +152,7 @@ public class TestIndex {
         }
         for (File file : files) {
             String fileName = file.getName();
-            String directory = filePath.getAbsolutePath().substring(rootPath.length());
-
+            String directory = filePath.getAbsolutePath().substring("/ddhome/arch/resource/".length());
             System.out.println("filePath：" + directory + "/" + fileName);
             // 若是目录
             if (file.isDirectory()) {
@@ -178,7 +186,7 @@ public class TestIndex {
     // 打印文件夹下所有子文件
     @Test
     public void sss() {
-        String a = "/ddhome/arch/resource/";
+        String a = "/ddhome/arch/resources/";
         System.out.println(a.length());
         File fileDir = new File("D:\\img\\新建文件夹\\新建文件夹");
         func(fileDir);

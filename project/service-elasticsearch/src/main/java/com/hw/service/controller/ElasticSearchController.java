@@ -86,6 +86,29 @@ public class ElasticSearchController {
     }
 
     /**
+     * 插入记录
+     *
+     * @return String
+     */
+    @RequestMapping("/insert")
+    public String insertModel(DataSource dataSource) {
+        dataSource.setUpdateTime(new Date());
+        dataSource.setVersion("S01");
+        String[] names = {"一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六"};
+        for (int i = 0; i < 16; i++) {
+            DataSource dataSourceBy = new DataSource();
+            dataSourceBy.setId(i + 1 + "");
+            dataSourceBy.setName(names[i]);
+            dataSourceBy.setFilePath("shier");
+            dataSourceBy.setVersion("S" + (i + 1));
+            dataSourceBy.setUpdateTime(new Date());
+            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(dataSourceBy);
+            ElasticsearchUtil.addData(jsonObject, indexName, esType, jsonObject.getString("id"));
+        }
+        return "1";
+    }
+
+    /**
      * 删除记录
      *
      * @param id   数据ID
@@ -96,6 +119,23 @@ public class ElasticSearchController {
         if (StringUtils.isNotBlank(id)) {
             ElasticsearchUtil.deleteDataById(indexName, esType, id);
             return "删除id=" + id;
+        } else {
+            return "id为空";
+        }
+    }
+
+    /**
+     * 批量删除记录
+     *
+     * @param id   数据Ids
+     * @return String
+     */
+    @RequestMapping("/deletes")
+    public String deletes(String id) {
+        String [] ids = {"16"};
+        if (ids != null) {
+            ElasticsearchUtil.deleteData(indexName, esType, ids);
+            return "删除id=" + ids;
         } else {
             return "id为空";
         }

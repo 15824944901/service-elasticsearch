@@ -40,6 +40,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.elasticsearch.plugin</groupId>
+            <artifactId>delete-by-query</artifactId>
+            <version>2.3.2</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.elasticsearch.client/transport -->
         <dependency>
             <groupId>org.elasticsearch</groupId>
