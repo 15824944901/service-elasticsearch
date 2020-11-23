@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,21 +61,36 @@ public class TestIndex {
     // 拷贝文件夹
     @Test
     public void copyFileDir() throws IOException {
-        File file = new File("D:\\ddhome\\arch\\resources\\data\\dataset\\2926");
+        File file = new File("D:\\ddhome\\arch\\resources\\data\\dataset\\2926\\15112.jpg");
+        String fileName = file.getName();
+        String[] split = fileName.split("\\.");
+        System.out.println(file.getName());
+        System.out.println("111" + fileName.replace("15112", "---"));
+        System.out.println(split.length);
         File file1 = new File("D:\\ddhome\\arch\\resources\\data\\dataset\\2925");
         FileUtils.copyDirectory(file,file1);
+    }
+
+    @Test
+    public void sssFile() {
+        String filePath = "data/kls/2926/dataset/1070/aa/bb";
+        String[] split1 = filePath.split("/");
+        String id = "1070";
+        String directory = split1[0] + "/" + split1[1] + "/" + split1[2] + "/" + id;
+        for (int i = 5;i < split1.length; i++) {
+            directory += "/" + split1[i] ;
+        }
+        System.out.println(directory);
     }
 
     // 拷贝文件
     @SneakyThrows
     @Test
     public void copyFile() {
-        File source = new File("D:\\img\\goods\\index.jpg");
-        for (int i = 0;i < 30000; i++) {
-            String src = "C:\\Users\\Administrator\\Desktop\\开发文档\\";
-            src += UUID.randomUUID().toString().substring(0,5) + i + ".jpg";
-            File dest = new File(src);
-            Files.copy(source.toPath(), dest.toPath());
+        String webkitRelativePath = "aa/bb";
+        String[] split = webkitRelativePath.split(",");
+        for (int i = 1; i < split.length; i++) {
+            System.out.println(split[i]);
         }
     }
 

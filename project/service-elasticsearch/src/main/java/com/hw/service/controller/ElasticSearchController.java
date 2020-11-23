@@ -27,12 +27,16 @@ public class ElasticSearchController {
     /**
      * 测试索引
      */
-    private String indexName = "megacorp";
+    //private String indexName = "megacorp";
+
+    private static final String indexName = "data-center";
+
+    private static final String esType = "file";
 
     /**
      * 类型
      */
-    private String esType = "employee";
+    //private String esType = "employee";
 
     /**
      * 创建索引
