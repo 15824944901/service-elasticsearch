@@ -10,10 +10,12 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
@@ -130,8 +132,7 @@ public class ElasticsearchUtil {
      * @return  String
      */
     public static String addData(JSONObject jsonObject, String index, String type, String id) {
-        BulkRequestBuilder builder = client.prepareBulk();
-        IndexResponse response = client.prepareIndex(index, type, id).setSource(jsonObject).get();
+        IndexResponse response = client.prepareIndex(index, type, id).setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE).setSource(jsonObject).get();
         LOGGER.info("addData response status:{},id:{}", response.status().getStatus(), response.getId());
         return response.getId();
     }
@@ -146,6 +147,24 @@ public class ElasticsearchUtil {
      */
     public static String addData(JSONObject jsonObject, String index, String type) {
         return addData(jsonObject, index, type, UUID.randomUUID().toString().replaceAll("-", "").toUpperCase());
+    }
+
+    /**
+     * 数据批量添加
+     *
+     * @param jsonObjects 增加的数据
+     * @param index       索引
+     * @param type        类型
+     * @return String
+     */
+    public static String addDataFiles(List<JSONObject> jsonObjects, String index, String type) {
+        BulkRequestBuilder builder = client.prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        for (JSONObject jsonObject : jsonObjects) {
+            IndexRequestBuilder request = client.prepareIndex(index,type).setSource(jsonObject);
+            builder.add(request);
+        }
+        BulkResponse response = builder.get();
+        return response.status().toString();
     }
 
     /**
@@ -169,7 +188,7 @@ public class ElasticsearchUtil {
      */
     public static void deleteData(String index, String type, String[] ids) {
         //1. 创建批处理对象
-        BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
+        BulkRequestBuilder bulkRequestBuilder = client.prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
         for (String id : ids) {
             bulkRequestBuilder.add(client.prepareDelete(index,type,id));
         }
@@ -190,7 +209,8 @@ public class ElasticsearchUtil {
 
         UpdateRequest updateRequest = new UpdateRequest();
 
-        updateRequest.index(index).type(type).id(id).doc(jsonObject);
+        updateRequest.index(index).type(type).id(id).doc(jsonObject)
+            .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         client.update(updateRequest);
 
@@ -350,6 +370,7 @@ public class ElasticsearchUtil {
 
         long totalHits = searchResponse.getHits().totalHits;
         long length = searchResponse.getHits().getHits().length;
+        LOGGER.info("-----到[{}]条数据,处理数据条数[{}]", searchResponse.getHits().toString(), length);
 
         LOGGER.info("共查询到[{}]条数据,处理数据条数[{}]", totalHits, length);
 

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * Date: 2020/8/31 9:59
@@ -26,6 +26,8 @@ import java.util.Date;
 @Data
 public class DataSource {
 
+    private int userId;
+
     /**
      * 单数据ID
      */
@@ -35,6 +37,11 @@ public class DataSource {
      * 数据集名称
      */
     private String name;
+
+    /**
+     * 数据集名称
+     */
+    private double size;
 
     /**
      * 版本号
@@ -55,7 +62,7 @@ public class DataSource {
      * 更新时间（包括创建时间）
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date updateTime;
+    private Timestamp updateTime;
 
     /**
      * 待扩展

@@ -2,6 +2,7 @@ package com.hw.service.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import java.util.Date;
 @Getter
 // set方法
 @Setter
+@Data
 public class Employee {
 
     private String id;

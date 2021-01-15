@@ -2,18 +2,18 @@ package com.hw.service.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hw.service.entity.DataSource;
-import com.hw.service.entity.Employee;
 import com.hw.service.util.ElasticSearchPage;
 import com.hw.service.util.ElasticsearchUtil;
-import org.apache.commons.httpclient.util.DateUtil;
-import org.apache.commons.lang3.StringUtils;
+import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -27,16 +27,16 @@ public class ElasticSearchController {
     /**
      * 测试索引
      */
-    //private String indexName = "megacorp";
+    private String indexName = "megacorp";
 
-    private static final String indexName = "data-center";
+    // private static final String indexName = "data-center";
 
-    private static final String esType = "file";
+    // private static final String esType = "file";
 
     /**
      * 类型
      */
-    //private String esType = "employee";
+    private String esType = "employee";
 
     /**
      * 创建索引
@@ -60,16 +60,24 @@ public class ElasticSearchController {
      * @return String
      */
     @RequestMapping("/insertJson")
-    public String insertJson() {
-        JSONObject jsonObject = new JSONObject();
+    public String insertJson(DataSource dataSource) {
+        System.out.println(dataSource.getName());
+        if (StringUtils.isNotEmpty(dataSource.getName())) {
+            System.out.println("ok");
+        }
+        if (StringUtil.isNullOrEmpty(dataSource.getFilePath())) {
+            System.out.println("yes");
+        }
+        System.out.println("no");
+        /*JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", DateUtil.formatDate(new Date()));
         jsonObject.put("age", 25);
         jsonObject.put("first_name", "j-" + new Random(100).nextInt());
         jsonObject.put("last_name", "cccc");
         jsonObject.put("about", "i like xiaofeng baby");
         jsonObject.put("date", new Date());
-        String id = ElasticsearchUtil.addData(jsonObject, indexName, esType, jsonObject.getString("id"));
-        return id;
+        String id = ElasticsearchUtil.addData(jsonObject, indexName, esType, jsonObject.getString("id"));*/
+        return "";
     }
 
     /**
@@ -79,12 +87,12 @@ public class ElasticSearchController {
      */
     @RequestMapping("/insertModel")
     public String insertModel() {
-        Employee employee = new Employee();
-        employee.setId("66");
-        employee.setFirstName("m-" + new Random(100).nextInt());
-        employee.setAge("24");
-        employee.setCtreaTime(new Date());
-        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(employee);
+        DataSource dataSource = new DataSource();
+        dataSource.setId("66");
+        dataSource.setFirstName("m-" + new Random(100).nextInt());
+        dataSource.setUserId(new Random().nextInt());
+        dataSource.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(dataSource);
         String id = ElasticsearchUtil.addData(jsonObject, indexName, esType, jsonObject.getString("id"));
         return id;
     }
@@ -96,19 +104,18 @@ public class ElasticSearchController {
      */
     @RequestMapping("/insert")
     public String insertModel(DataSource dataSource) {
-        dataSource.setUpdateTime(new Date());
-        dataSource.setVersion("S01");
         String[] names = {"一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六"};
-        for (int i = 0; i < 16; i++) {
+        List<JSONObject> list = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
             DataSource dataSourceBy = new DataSource();
-            dataSourceBy.setId(i + 1 + "");
-            dataSourceBy.setName(names[i]);
+            dataSourceBy.setName(names[1]);
             dataSourceBy.setFilePath("shier");
             dataSourceBy.setVersion("S" + (i + 1));
-            dataSourceBy.setUpdateTime(new Date());
+            dataSourceBy.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             JSONObject jsonObject = (JSONObject) JSONObject.toJSON(dataSourceBy);
-            ElasticsearchUtil.addData(jsonObject, indexName, esType, jsonObject.getString("id"));
+            list.add(jsonObject);
         }
+        ElasticsearchUtil.addDataFiles(list, indexName, esType);
         return "1";
     }
 
@@ -136,7 +143,7 @@ public class ElasticSearchController {
      */
     @RequestMapping("/deletes")
     public String deletes(String id) {
-        String [] ids = {"16"};
+        String [] ids = {"8B7D3229B4A24A2184C038DE32B49717"};
         if (ids != null) {
             ElasticsearchUtil.deleteData(indexName, esType, ids);
             return "删除id=" + ids;
@@ -154,12 +161,17 @@ public class ElasticSearchController {
     @RequestMapping("/update")
     public String update(String id) {
         if (StringUtils.isNotBlank(id)) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", id);
-            jsonObject.put("age", 31);
-            jsonObject.put("name", "修改");
-            jsonObject.put("date", new Date());
-            ElasticsearchUtil.updateDataById(jsonObject, indexName, esType, id);
+            List<JSONObject> list = new ArrayList<>();
+            DataSource dataSource = new DataSource();
+            dataSource.setId(id);
+            dataSource.setFilePath("shier");
+            dataSource.setName("一一");
+            dataSource.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+            JSONObject jsonObject = (JSONObject) JSONObject.toJSON(dataSource);
+            list.add(jsonObject);
+            ElasticsearchUtil.addDataFiles(list, indexName, esType);
+            //JSONObject jsonObject = new JSONObject();
+            //ElasticsearchUtil.updateDataById(jsonObject, indexName, esType, id);
             return "id=" + id;
         } else {
             return "id为空";
@@ -205,38 +217,35 @@ public class ElasticSearchController {
     /**
      * 模糊查询
      *
-     * @param dataSource 数据对象
+     * @param keyword 查询条件
      * @return String
      */
     @RequestMapping("/queryMatchData")
-    public String queryMatchData(DataSource dataSource) {
+    public String queryMatchData(String keyword) {
         // 确认索引是否存在，不存在则创建
         boolean indexExist = ElasticsearchUtil.isIndexExist(indexName);
         if (!indexExist) {
             ElasticsearchUtil.createIndex(indexName);
         }
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         // 不进行分词搜索
         if (true) {
-            String parentId = dataSource.getParentId();
-            if (StringUtils.isNotBlank(parentId)) {
-                boolQuery.must(QueryBuilders.matchPhraseQuery("parentId.keyword", parentId));
-            }
-            String keyword = dataSource.getName();
-            if (StringUtils.isNotBlank(keyword)) {
-                QueryBuilder userName = QueryBuilders.wildcardQuery("name.keyword", "*" + keyword + "*");
-                boolQueryBuilder.should(userName); // should 代表 or
-                QueryBuilder version = QueryBuilders.wildcardQuery("version.keyword", "*" + keyword + "*");
-                boolQueryBuilder.should(version);
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            List<String> list = new ArrayList<>();
+            list.add("一");
+            list.add("二");
+            for (String str : list) {
+                boolQueryBuilder.should(QueryBuilders.wildcardQuery("name.keyword", str + "*"));
             }
             boolQuery.must(boolQueryBuilder);
+            //boolQueryBuilder.should(QueryBuilders.wildcardQuery("name.keyword", "一" + "*"));
+            //boolQueryBuilder.should(QueryBuilders.wildcardQuery("name.keyword", "二" + "*"));
         } else {
             // 分词搜索
-            boolQuery.must(QueryBuilders.matchQuery("name", dataSource.getName()));
+            boolQuery.must(QueryBuilders.matchQuery("name", keyword));
         }
         List<Map<String, Object>> list = ElasticsearchUtil.
-            searchListData(indexName, esType, boolQuery,0, 10, "name", null, dataSource.getName());
+            searchListData(indexName, esType, boolQuery,0, 10, null, null, null);
         return JSONObject.toJSONString(list);
     }
 
