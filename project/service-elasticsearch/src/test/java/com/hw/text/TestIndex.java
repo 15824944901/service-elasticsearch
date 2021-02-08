@@ -1,13 +1,18 @@
 package com.hw.text;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.hw.service.common.DataExcetptionEnum;
 import com.hw.service.entity.DataSource;
+import com.hw.service.entity.Student;
+import com.hw.service.enums.DataTypeEnum;
 import com.hw.service.exception.ServiceException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +34,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,6 +54,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,8 +85,135 @@ public class TestIndex {
         put("test2", "测试2");
     }};
 
+
     @Test
-    public void sdaw() {
+    public void getete() {
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = formatter.format(currentTime);
+        ParsePosition pos = new ParsePosition(8);
+        Date currentTime_2 = formatter.parse(dateString, pos);
+        System.out.println(currentTime_2);
+        String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        System.out.println(format);
+    }
+
+    /**
+     * 字符串转数组
+     */
+    @Test
+    public void toArray() {
+        String ids = "[804675310699757568,804756206379466752,806112677012918272]";
+        System.out.println(Arrays.asList(ids.split(",")));
+        List<Long> longs = JSON.parseArray(ids, Long.class);
+        System.out.println(longs);
+    }
+
+    /**
+     * 数组转字符串
+     */
+    @Test
+    public void getArras() {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+
+        String jsonString = JSONObject.toJSONString(list);
+        System.out.println(jsonString);
+    }
+
+
+    @Test
+    public void getParent() {
+        List<Student> studentList = new ArrayList<>();
+
+        Student student = new Student();
+        student.setId(1L);
+        student.setName("十");
+        student.setLevel(1);
+        student.setParentId(1L);
+
+        Student student2 = new Student();
+        student2.setId(2L);
+        student2.setName("十一");
+        student2.setLevel(2);
+        student2.setParentId(1L);
+
+        Student student3 = new Student();
+        student3.setId(3L);
+        student3.setName("二十");
+        student3.setLevel(1);
+        student3.setParentId(3L);
+
+        Student student4 = new Student();
+        student4.setId(4L);
+        student4.setName("二十一");
+        student4.setLevel(2);
+        student4.setParentId(3L);
+
+        studentList.add(student);
+        studentList.add(student2);
+        studentList.add(student3);
+        studentList.add(student4);
+
+        Map<Long, List<Student>> collect = studentList.stream().filter(student1 -> student1.getLevel() != 1).collect(Collectors.groupingBy(Student::getParentId));
+
+        System.out.println(collect);
+    }
+
+    /**
+     * 原子类操作
+     */
+    @Test
+    public void getAtom() {
+        AtomicInteger count = new AtomicInteger();
+        System.out.println(count.addAndGet(1)); // ++i
+        System.out.println(count.getAndAdd(1)); // i++
+        System.out.println(System.currentTimeMillis());
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+    @Test
+    public void getEnum() {
+        int code = DataTypeEnum.LOCAL_DATA.getCode();
+        System.out.println(code);
+        System.out.println(DataTypeEnum.LOCAL_DATA);
+    }
+
+
+    @Test
+    public void isObject() {
+        DataSource dataSource = new DataSource();
+        dataSource.setFirstName("123");
+        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(dataSource);
+        Object firstName = jsonObject.get("firstName");
+        System.out.println(firstName);
+    }
+
+    @Test
+    public void getIsEnmg() {
+        int fileNumbers = 12;
+        int fullNum = 10;
+        int surplusNum = fileNumbers % fullNum;
+        if (fileNumbers > 100) {
+            fullNum = fileNumbers / fullNum;
+            surplusNum = fileNumbers - fullNum * 10;
+        }
+
+        if (fullNum == 2) {
+            System.out.println("1");
+        } else if (surplusNum != 0 && 0 == fileNumbers - 12) {
+            System.out.println("2");
+        }
+        System.out.println("fullNum: " + fullNum);
+        System.out.println("surplusNum: " + surplusNum);
+
+    }
+
+    @Test
+    public void getReplace() {
         List<String> list = new ArrayList<>();
         list.add("1");
         list.add("2");
@@ -87,10 +224,8 @@ public class TestIndex {
         for (String str : list) {
             if (str.contains("1")) {
                 str = str.replace("1", "\\1");
-                arrayList.add(str);
-            } else {
-                arrayList.add(str);
             }
+            arrayList.add(str);
         }
         System.out.println(arrayList);
     }
@@ -118,7 +253,13 @@ public class TestIndex {
         }
 
         String url = "www.%s.com";
-        System.out.println(String.format(url, "baidu"));
+        String StrFormat = String.format(url, "baidu%s");
+        System.out.println(StrFormat);
+
+        String  count = "%d";
+        String intFormat = String.format(count, 1);
+        System.out.println(intFormat);
+
     }
 
 

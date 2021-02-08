@@ -12,6 +12,7 @@ import java.util.Date;
 
 /**
  * Date: 2020/9/8
+ * @author Administrator
  */
 // 有参构造
 @AllArgsConstructor
@@ -28,6 +29,8 @@ public class Employee {
 
     private String id;
 
+    private String name;
+
     private String firstName;
 
     private String lastName;
@@ -39,6 +42,10 @@ public class Employee {
     private String parentVersion;
 
     private String version;
+
+    private Integer level;
+
+    private String parentId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date ctreaTime;
